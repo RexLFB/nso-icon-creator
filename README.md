@@ -1,9 +1,24 @@
 # NSO Icon Creator
+[![Deploy](https://github.com/harissabil/nso-icon-creator/actions/workflows/deploy.yml/badge.svg)](https://github.com/harissabil/nso-icon-creator/actions/workflows/deploy.yml)
 
-A web recreation of the Nintendo Switch Online icon creator. Pick a game, stack
-a background, a character and a frame, then download the result as a PNG.
+Pick a game, stack a background, a character and a frame, then download the
+result as a PNG.
 
-**[Try it](https://harissabil.github.io/nso-icon-creator/)**
+## Screenshot
+
+![](https://github.com/user-attachments/assets/bd672087-4786-4d36-bf69-f7ae5a64f915)
+
+<details>
+  <summary><b>More Screenshots</b></summary>
+
+![](https://github.com/user-attachments/assets/5f81f9e4-ed64-42b8-b5d2-0ce8774e136a)
+![](https://github.com/user-attachments/assets/1673bba7-523b-45c1-a7ea-7b6e6e0f5acd)
+![](https://github.com/user-attachments/assets/380c1acf-4224-44d0-8a05-a6e1292d600c)
+
+</details>
+
+</table>
+
 
 ## Controls
 
@@ -24,7 +39,7 @@ npm run catalog   # builds the icon catalog, needs network, takes a few minutes
 npm run dev
 ```
 
-`npm run catalog` reads the icon repo listing and looks up cover art for each
+The `npm run catalog` command reads the icon repo listing and looks up cover art for each
 game, then writes `public/catalog.json`. You only need to run it again when new
 icon packs are added upstream.
 
