@@ -12,8 +12,7 @@
   --focus-blue: #5aa8ff;
   --focus-magenta: #ff3ca0;
   --focus-solid: #3dcfff;
-  --content-max: 1280px;
-  --header-h: 92px;
+  --content-max: 100%;
   --footer-h: 66px;
   --pad: clamp(16px, 4vw, 48px);
   --random-gap: 28px;
