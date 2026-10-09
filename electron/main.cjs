@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, shell, Menu } = require('electron');
+const { app, BrowserWindow, protocol, net, shell, Menu, session } = require('electron');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 
@@ -27,9 +27,14 @@ function createWindow() {
     },
   });
 
+  // F11: pantalla completa. F12: herramientas de desarrollo (para depurar).
   win.webContents.on('before-input-event', (event, input) => {
-    if (input.type === 'keyDown' && input.key === 'F11') {
+    if (input.type !== 'keyDown') return;
+    if (input.key === 'F11') {
       win.setFullScreen(!win.isFullScreen());
+      event.preventDefault();
+    } else if (input.key === 'F12') {
+      win.webContents.toggleDevTools();
       event.preventDefault();
     }
   });
@@ -62,6 +67,13 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
+
+    // Algunos CDN de imágenes rechazan el user-agent por defecto de Electron.
+    const cleanUA = session.defaultSession
+      .getUserAgent()
+      .replace(/\s*Electron\/\S+/i, '')
+      .replace(/(\(KHTML, like Gecko\))\s+\S+\/\S+(\s+Chrome\/)/, '$1$2');
+    session.defaultSession.setUserAgent(cleanUA);
 
     protocol.handle('app', (request) => {
       const { pathname } = new URL(request.url);
