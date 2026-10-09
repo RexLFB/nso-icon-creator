@@ -34,13 +34,19 @@
     "electron": "^37.2.0",
     "electron-builder": "^26.0.12"
   },
-  "build": {
+    "build": {
     "appId": "com.harissabil.nsoiconcreator",
     "productName": "NSO Icon Creator",
     "directories": { "output": "release" },
     "files": ["dist/**/*", "electron/main.cjs", "package.json"],
     "win": { "target": ["nsis", "portable"] },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false },
-    "artifactName": "${productName}-${version}-${target}.${ext}"
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    }
   }
-}
