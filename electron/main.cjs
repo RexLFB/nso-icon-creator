@@ -19,6 +19,7 @@ function createWindow() {
     minHeight: 500,
     backgroundColor: '#000000',
     title: 'NSO Icon Creator',
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
