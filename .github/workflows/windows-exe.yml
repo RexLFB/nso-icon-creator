@@ -1,0 +1,29 @@
+name: Build Windows .exe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - name: Build installer and portable .exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run desktop:build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NSO-Icon-Creator-windows
+          path: release/*.exe
