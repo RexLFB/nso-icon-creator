@@ -3,13 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "NSO Icon Creator",
+  "author": "NSO Icon Creator",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "catalog": "node scripts/build-catalog.mjs",
     "banners": "node scripts/fix-banners.mjs",
     "build": "node scripts/build-catalog.mjs && tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "desktop:web": "node electron/prepare-web.mjs",
+    "desktop:dev": "npm run desktop:web && electron .",
+    "desktop:build": "npm run desktop:web && electron-builder --win --x64 --publish never"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -24,6 +30,17 @@
     "nintendo-switch-eshop": "^9.0.0",
     "oxlint": "^1.75.0",
     "typescript": "~6.0.2",
-    "vite": "^8.2.0"
+    "vite": "^8.2.0",
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.harissabil.nsoiconcreator",
+    "productName": "NSO Icon Creator",
+    "directories": { "output": "release" },
+    "files": ["dist/**/*", "electron/main.cjs", "package.json"],
+    "win": { "target": ["nsis", "portable"] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false },
+    "artifactName": "${productName}-${version}-${target}.${ext}"
   }
 }
