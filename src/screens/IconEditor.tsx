@@ -31,7 +31,7 @@ export function IconEditor() {
     if (index === 4) {
       await downloadIcon(
         comboUrls(category.slug, { frame, character, background }, hideShadow),
-        `${category.slug}-icon.png`,
+        `${category.slug}-icon.jpg`,
       );
     }
   };
