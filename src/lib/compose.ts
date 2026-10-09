@@ -153,20 +153,33 @@ export async function composeIcon(input: ComposeInput): Promise<HTMLCanvasElemen
   return canvas;
 }
 
-export async function downloadIcon(input: ComposeInput, filename = 'nso-icon.png') {
-  const canvas = await composeIcon(input);
+export async function downloadIcon(input: ComposeInput, filename = 'nso-icon.jpg') {
+  const source = await composeIcon(input);
+  // JPG no admite transparencia: se pinta sobre un fondo blanco.
+  const canvas = document.createElement('canvas');
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(source, 0, 0);
   await new Promise<void>((resolve) => {
-    canvas.toBlob((blob) => {
-      if (!blob) return resolve();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      // Revoking in the same tick can cancel the download in some browsers.
-      setTimeout(() => URL.revokeObjectURL(url), 10_000);
-      resolve();
-    }, 'image/png');
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return resolve();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        // Revoking in the same tick can cancel the download in some browsers.
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
+        resolve();
+      },
+      'image/jpeg',
+      0.95,
+    );
   });
 }
 
