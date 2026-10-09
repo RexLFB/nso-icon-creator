@@ -153,34 +153,75 @@ export async function composeIcon(input: ComposeInput): Promise<HTMLCanvasElemen
   return canvas;
 }
 
-export async function downloadIcon(input: ComposeInput, filename = 'nso-icon.jpg') {
-  const source = await composeIcon(input);
-  // JPG no admite transparencia: se pinta sobre un fondo blanco.
+/** PNG keeps transparency. JPG is painted over a white background. */
+function renderBlob(source: HTMLCanvasElement, asPng: boolean): Promise<Blob | null> {
+  if (asPng) {
+    return new Promise((resolve) => source.toBlob((blob) => resolve(blob), 'image/png'));
+  }
   const canvas = document.createElement('canvas');
   canvas.width = source.width;
   canvas.height = source.height;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) return Promise.resolve(null);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(source, 0, 0);
-  await new Promise<void>((resolve) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return resolve();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.click();
-        // Revoking in the same tick can cancel the download in some browsers.
-        setTimeout(() => URL.revokeObjectURL(url), 10_000);
-        resolve();
-      },
-      'image/jpeg',
-      0.95,
-    );
-  });
+  return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95));
+}
+
+type SaveFilePicker = (options: {
+  suggestedName?: string;
+  types?: { description?: string; accept: Record<string, string[]> }[];
+}) => Promise<{
+  name: string;
+  createWritable: () => Promise<{
+    write: (data: Blob) => Promise<void>;
+    close: () => Promise<void>;
+  }>;
+}>;
+
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  // Revoking in the same tick can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+export async function downloadIcon(input: ComposeInput, filename = 'nso-icon.jpg') {
+  const source = await composeIcon(input);
+  const baseName = filename.replace(/\.[^.]+$/, '');
+
+  // Save dialog: JPG is the default type, PNG is the alternative.
+  const picker = (window as unknown as { showSaveFilePicker?: SaveFilePicker }).showSaveFilePicker;
+  if (picker) {
+    try {
+      const handle = await picker.call(window, {
+        suggestedName: `${baseName}.jpg`,
+        types: [
+          { description: 'JPG (fondo blanco)', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } },
+          { description: 'PNG (transparente)', accept: { 'image/png': ['.png'] } },
+        ],
+      });
+      const asPng = /\.png$/i.test(handle.name);
+      const blob = await renderBlob(source, asPng);
+      if (!blob) return;
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    } catch (err) {
+      // The user closed the dialog: do nothing.
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      // Any other problem: fall back to a plain JPG download below.
+    }
+  }
+
+  const blob = await renderBlob(source, false);
+  if (!blob) return;
+  triggerDownload(blob, `${baseName}.jpg`);
 }
 
 export async function processedPartUrl(url: string, hideShadow: boolean): Promise<string> {
